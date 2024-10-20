@@ -3,7 +3,6 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Appium;
 using OpenQA.Selenium.Appium.Enums;
 using UITest.Core;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace UITest.Appium
 {
