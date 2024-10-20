@@ -19,14 +19,8 @@ public class Bugzilla60045 : _IssuesUITest
 	[Category(UITestCategories.ListView)]
 	public void CommandDoesNotFire()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		var clickThis = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + ClickThis + "']"));
-		clickThis.Click();
-
-		App.WaitForNoElement(Fail);
+		RunningApp.WaitForElement(ClickThis);
+		RunningApp.Tap(ClickThis);
+		RunningApp.WaitForNoElement(Fail);
 	}
 }

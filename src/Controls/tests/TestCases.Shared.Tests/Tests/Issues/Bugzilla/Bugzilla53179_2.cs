@@ -18,6 +18,6 @@ public class Bugzilla53179_2 : _IssuesUITest
 	[FailsOnAndroid]
 	public void RemovePageOnAppearingDoesNotCrash()
 	{
-		App.WaitForElement(Success);
+		RunningApp.WaitForElement(Success);
 	}
 }

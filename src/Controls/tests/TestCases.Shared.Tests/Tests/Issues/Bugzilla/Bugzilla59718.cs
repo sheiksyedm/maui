@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using UITest.Appium;
 using UITest.Core;
 
@@ -24,28 +23,19 @@ public class Bugzilla59718 : _IssuesUITest
 	[FailsOnIOS]
 	public void Bugzilla59718Test()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-		
-		var target1 = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{Target1}" + "']"));
-		target1.Click();
+		RunningApp.WaitForElement(Target1);
+		RunningApp.Tap(Target1);
 
-		var target1b = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{Target1b}" + "']"));
-		ClassicAssert.NotNull(target1b);
+		RunningApp.WaitForElement(Target1b);
 
-		var target2 = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{Target2}" + "']"));
-		target2.Click();
+		RunningApp.WaitForElement(Target2);
+		RunningApp.Tap(Target2);
 
-		var target3 = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{Target3}" + "']"));
-		ClassicAssert.NotNull(target3);
+		RunningApp.WaitForElement(Target3);
 
-		App.WaitForElement(GoBackButtonId);
-		App.Tap(GoBackButtonId);
+		RunningApp.WaitForElement(GoBackButtonId);
+		RunningApp.Tap(GoBackButtonId);
 
-		var target1Again = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{Target1}" + "']"));
-		ClassicAssert.NotNull(target1Again);
-
+		RunningApp.WaitForElement(Target1);
 	}
 }

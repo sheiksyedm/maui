@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using UITest.Appium;
 using UITest.Core;
 
@@ -18,15 +17,8 @@ public class Issue1875 : _IssuesUITest
 	[FailsOnIOS]
 	public void NSRangeException()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		var clickThis = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + "Load" + "']"));
-		clickThis.Click();
-
-		var element5 = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + "5" + "']"));
-		ClassicAssert.IsNotNull(element5);
+		RunningApp.WaitForElement("Load");
+		RunningApp.Tap("Load");
+		RunningApp.WaitForElement("5");
 	}
 }

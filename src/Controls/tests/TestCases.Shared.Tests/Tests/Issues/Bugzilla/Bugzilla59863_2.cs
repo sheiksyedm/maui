@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using UITest.Appium;
 using UITest.Core;
 
@@ -22,31 +21,17 @@ public class Bugzilla59863_2 : _IssuesUITest
 	[FailsOnIOS]
 	public void DoubleTapWithMixedRecognizersShouldRegisterDoubleTap()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		App.WaitForElement(MixedTapBoxId);
-		App.DoubleTap(MixedTapBoxId);
-		
-		var result = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"1 {Doubles} on {MixedTapBoxId}" + "']"));
-		ClassicAssert.NotNull(result);
+		RunningApp.WaitForElement(MixedTapBoxId);
+		RunningApp.DoubleTap(MixedTapBoxId);
+		RunningApp.WaitForElement($"1 {Doubles} on {MixedTapBoxId}");
 	}
 
 	[Test]
 	[FailsOnIOS]
 	public void SingleTapWithMixedRecognizersShouldRegisterSingleTap()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		App.WaitForElement(MixedTapBoxId);
-		App.Tap(MixedTapBoxId);
-
-		var result = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"1 {Singles} on {MixedTapBoxId}" + "']"));
-		ClassicAssert.NotNull(result);
+		RunningApp.WaitForElement(MixedTapBoxId);
+		RunningApp.Tap(MixedTapBoxId);
+		RunningApp.WaitForElement($"1 {Singles} on {MixedTapBoxId}");
 	}
 }

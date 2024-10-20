@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using NUnit.Framework.Legacy;
 using UITest.Appium;
 using UITest.Core;
 
@@ -19,15 +18,8 @@ public class Bugzilla53179_1 : _IssuesUITest
 	[Category(UITestCategories.Navigation)]
 	public void PopAsyncAfterRemovePageDoesNotCrash()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-		
-		var startTest = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + StartTest + "']"));
-		startTest.Click();
-
-		var rootLabel = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + RootLabel + "']"));
-		ClassicAssert.NotNull(rootLabel);
+		RunningApp.WaitForElement(StartTest);
+		RunningApp.Tap(StartTest);
+		RunningApp.WaitForElement(RootLabel);
 	}
 }

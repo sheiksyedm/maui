@@ -22,40 +22,27 @@ public class Bugzilla59863_0 : _IssuesUITest
 	public void TapsCountShouldMatch()
 	{
 		// Gonna add this test because we'd want to know if it _did_ start failing
-		// But it doesn't really help much with this issue; UI test can't tap fast enough to demonstrate the 
-		// problem we're trying to solve
-		
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
+		// 	But it doesn't really help much with this issue; UI test can't tap fast enough to demonstrate the 
+		// 	problem we're trying to solve
 
 		int tapsToTest = 5;
 
-		App.WaitForElement(SingleTapBoxId);
+		RunningApp.WaitForElement(SingleTapBoxId);
 
 		for (int n = 0; n < tapsToTest; n++)
 		{
-			App.Tap(SingleTapBoxId);
+			RunningApp.Tap(SingleTapBoxId);
 		}
 
-		var result = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{tapsToTest} {Singles} on {SingleTapBoxId}" + "']"));
-		ClassicAssert.NotNull(result);
+		RunningApp.WaitForElement($"{tapsToTest} {Singles} on {SingleTapBoxId}");
 	}
 
 	[Test]
 	[FailsOnIOS]
 	public void DoubleTapWithOnlySingleTapRecognizerShouldRegisterTwoTaps()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		App.WaitForElement(SingleTapBoxId);
-		App.DoubleTap(SingleTapBoxId);
-
-		var result = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"2 {Singles} on {SingleTapBoxId}" + "']"));
-		ClassicAssert.NotNull(result);
+		RunningApp.WaitForElement(SingleTapBoxId);
+		RunningApp.DoubleTap(SingleTapBoxId);
+		RunningApp.WaitForElement($"2 {Singles} on {SingleTapBoxId}");
 	}
 }

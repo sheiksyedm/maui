@@ -20,15 +20,8 @@ public class Issue3524 : _IssuesUITest
 	[FailsOnIOS]
 	public void SpanGestureCommand()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		var text = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + kText + "']"));
-		text.Click();
-
-		var result = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + $"{kText}: 1" + "']"));
-		ClassicAssert.NotNull(result);
+		RunningApp.WaitForElement(kText);
+		RunningApp.Tap(kText);
+		RunningApp.WaitForElement($"{kText}: 1");
 	}
 }

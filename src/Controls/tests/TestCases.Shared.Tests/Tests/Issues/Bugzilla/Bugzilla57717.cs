@@ -20,13 +20,6 @@ public class Bugzilla57717 : _IssuesUITest
 	[FailsOnIOS]
 	public void ButtonBackgroundColorAutomatedTest()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		// With the original bug in place, we'll crash before we get this far
-		var button = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + ButtonText + "']"));
-		ClassicAssert.NotNull(button);
+		RunningApp.WaitForElement(ButtonText);
 	}
 }

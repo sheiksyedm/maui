@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using OpenQA.Selenium.DevTools;
 using UITest.Appium;
 using UITest.Core;
 
@@ -21,16 +20,10 @@ public class Bugzilla58779 : _IssuesUITest
 	[Category(UITestCategories.DisplayAlert)]
 	public void Bugzilla58779Test()
 	{
-		if (App is not AppiumApp app2 || app2 is null || app2.Driver is null)
-		{
-			throw new InvalidOperationException("Cannot run test. Missing driver to run quick tap actions.");
-		}
-
-		App.WaitForElement(ButtonId);
-		App.Tap(ButtonId);
-		App.Screenshot("Check list fits on screen");
-
-		var cancel = app2.Driver.FindElement(OpenQA.Selenium.By.XPath("//*[@text='" + CancelId + "']"));
-		cancel.Click();
+		RunningApp.WaitForElement(ButtonId);
+		RunningApp.Tap(ButtonId);
+		RunningApp.Screenshot("Check list fits on screen");
+		RunningApp.WaitForElement(CancelId);
+		RunningApp.Tap(CancelId);
 	}
 }
