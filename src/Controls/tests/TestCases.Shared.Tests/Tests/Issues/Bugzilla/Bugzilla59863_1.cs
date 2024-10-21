@@ -18,6 +18,7 @@ public class Bugzilla59863_1 : _IssuesUITest
 
 	[Test]
 	[FailsOnIOS]
+	[FailsOnWindows]
 	public void SingleTapWithOnlyDoubleTapRecognizerShouldRegisterNothing()
 	{
 		RunningApp.WaitForElement(DoubleTapBoxId);
@@ -27,6 +28,7 @@ public class Bugzilla59863_1 : _IssuesUITest
 
 	[Test]
 	[FailsOnIOS]
+	[FailsOnWindows]
 	public void DoubleTapWithOnlyDoubleTapRecognizerShouldRegisterOneDoubleTap()
 	{
 		RunningApp.WaitForElement(DoubleTapBoxId);

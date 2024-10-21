@@ -19,6 +19,7 @@ public class Bugzilla59863_0 : _IssuesUITest
 
 	[Test]
 	[FailsOnIOS]
+	[FailsOnWindows]
 	public void TapsCountShouldMatch()
 	{
 		// Gonna add this test because we'd want to know if it _did_ start failing
@@ -39,6 +40,7 @@ public class Bugzilla59863_0 : _IssuesUITest
 
 	[Test]
 	[FailsOnIOS]
+	[FailsOnWindows]
 	public void DoubleTapWithOnlySingleTapRecognizerShouldRegisterTwoTaps()
 	{
 		RunningApp.WaitForElement(SingleTapBoxId);

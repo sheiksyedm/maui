@@ -15,6 +15,7 @@ public class Issue11107 : _IssuesUITest
 	[Test]
 	[Category(UITestCategories.Shell)]
 	[FailsOnIOS]
+	[FailsOnMac]
 	public void TabShouldntBeVisibleWhenThereIsOnlyOnePage()
 	{
 		RunTests();

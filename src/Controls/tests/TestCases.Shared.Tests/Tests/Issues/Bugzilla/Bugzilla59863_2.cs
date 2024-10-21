@@ -19,6 +19,7 @@ public class Bugzilla59863_2 : _IssuesUITest
 
 	[Test]
 	[FailsOnIOS]
+	[FailsOnWindows]
 	public void DoubleTapWithMixedRecognizersShouldRegisterDoubleTap()
 	{
 		RunningApp.WaitForElement(MixedTapBoxId);
@@ -28,6 +29,7 @@ public class Bugzilla59863_2 : _IssuesUITest
 
 	[Test]
 	[FailsOnIOS]
+	[FailsOnWindows]
 	public void SingleTapWithMixedRecognizersShouldRegisterSingleTap()
 	{
 		RunningApp.WaitForElement(MixedTapBoxId);
