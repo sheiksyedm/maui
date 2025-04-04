@@ -327,7 +327,7 @@ namespace Microsoft.Maui.Controls
 
 		void UpdateStrokeShape()
 		{
-			if (StrokeShape is Shape strokeShape && StrokeThickness == 0)
+			if (StrokeShape is Shape strokeShape && StrokeThickness <= 0)
 			{
 				strokeShape.StrokeThickness = StrokeThickness;
 			}
