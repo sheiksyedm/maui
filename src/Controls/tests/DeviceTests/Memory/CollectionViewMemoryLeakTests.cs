@@ -62,11 +62,12 @@ public class CollectionViewMemoryLeakTests : ControlsHandlerTestBase
 			observable = null;
 			page = null;
 
-			// Navigate away from the page
+			// Navigate away from the page - this should trigger our fix
 			await navPage.Navigation.PopAsync();
 		});
 
-		// Force garbage collection and wait
+		// Force garbage collection and wait for objects to be collected
+		// The fix should have cleared ItemsSource, allowing models to be GC'd
 		await AssertionExtensions.WaitForGC(modelReferences.ToArray());
 		await AssertionExtensions.WaitForGC(collectionViewReference, pageReference);
 	}
