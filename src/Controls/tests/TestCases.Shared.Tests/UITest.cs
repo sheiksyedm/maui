@@ -14,7 +14,7 @@ namespace Microsoft.Maui.TestCases.Tests
 #if ANDROID
 	[TestFixture(TestDevice.Android)]
 #elif IOSUITEST
-		[TestFixture(TestDevice.iOS)]
+	[TestFixture(TestDevice.iOS)]
 #elif MACUITEST
 		[TestFixture(TestDevice.Mac)]
 #elif WINTEST
@@ -106,6 +106,35 @@ namespace Microsoft.Maui.TestCases.Tests
 			App.ResetApp();
 		}
 
+		public enum DeviceOrientation
+		{
+			Portrait,
+			Landscape
+		}
+		DeviceOrientation GetDeviceOrientation()
+		{
+			try
+			{
+				if (_testDevice == TestDevice.Android || _testDevice == TestDevice.iOS)
+				{
+					var appiumApp = (AppiumApp)App;
+					var orientation = appiumApp.Driver.Orientation;
+
+					return orientation.ToString().Equals("Portrait", StringComparison.OrdinalIgnoreCase)
+						? DeviceOrientation.Portrait
+						: DeviceOrientation.Landscape;
+				}
+
+				// For Windows and Mac, assume portrait for now
+				return DeviceOrientation.Portrait;
+			}
+			catch
+			{
+				// Fallback to portrait if we can't determine orientation
+				return DeviceOrientation.Portrait;
+			}
+		}
+
 		/// <summary>
 		/// Verifies the screenshots and returns an exception in case of failure.
 		/// </summary>
@@ -124,8 +153,6 @@ namespace Microsoft.Maui.TestCases.Tests
 			ref Exception? exception,
 			string? name = null,
 			TimeSpan? retryDelay = null,
-			int cropLeft = 0,
-			int cropRight = 0,
 			int cropTop = 0,
 			int cropBottom = 0,
 			double tolerance = 0.0
@@ -136,7 +163,7 @@ namespace Microsoft.Maui.TestCases.Tests
 		{
 			try
 			{
-				VerifyScreenshot(name, retryDelay, cropLeft, cropRight, cropTop, cropBottom, tolerance
+				VerifyScreenshot(name, retryDelay, cropTop, cropBottom, tolerance
 #if MACUITEST || WINTEST
 				, includeTitleBar
 #endif
@@ -153,8 +180,6 @@ namespace Microsoft.Maui.TestCases.Tests
 		/// </summary>
 		/// <param name="name">Optional name for the screenshot. If not provided, a default name will be used.</param>
 		/// <param name="retryDelay">Optional delay between retry attempts when verification fails.</param>
-		/// <param name="cropLeft">Number of pixels to crop from the left of the screenshot.</param>
-		/// <param name="cropRight">Number of pixels to crop from the right of the screenshot.</param>
 		/// <param name="cropTop">Number of pixels to crop from the top of the screenshot.</param>
 		/// <param name="cropBottom">Number of pixels to crop from the bottom of the screenshot.</param>
 		/// <param name="tolerance">Tolerance level for image comparison as a percentage from 0 to 100.</param>
@@ -183,8 +208,6 @@ namespace Microsoft.Maui.TestCases.Tests
 		public void VerifyScreenshot(
 			string? name = null,
 			TimeSpan? retryDelay = null,
-			int cropLeft = 0,
-			int cropRight = 0,
 			int cropTop = 0,
 			int cropBottom = 0,
 			double tolerance = 0.0 // Add tolerance parameter (0.05 = 5%)
@@ -327,19 +350,40 @@ namespace Microsoft.Maui.TestCases.Tests
 				// The default values are set based on the platform, but the final cropping is determined by the parameters passed in.
 				// This allows cropping of UI elements (such as navigation bars or home indicators) for any platform as needed.
 				int cropFromLeft = 0;
-				int cropFromRight = 0;
 
-				cropFromLeft = cropLeft > 0 ? cropLeft : cropFromLeft;
-				cropFromRight = cropRight > 0 ? cropRight : cropFromRight;
+				if (_testDevice == TestDevice.Android)
+				{
+					var orientation = GetDeviceOrientation();
+					if (orientation == DeviceOrientation.Portrait)
+					{
+						cropFromBottom = 125; // Crop navigation bar from bottom in portrait
+					}
+					else if (orientation == DeviceOrientation.Landscape)
+					{
+						cropFromLeft = 125; // Crop navigation bar from left in landscape
+					}
+				}
+				else if (_testDevice == TestDevice.iOS)
+				{
+					cropFromBottom = 40;
+				}
+
+
 				cropFromTop = cropTop > 0 ? cropTop : cropFromTop;
 				cropFromBottom = cropBottom > 0 ? cropBottom : cropFromBottom;
 
-				if (cropFromLeft > 0 || cropFromRight > 0 || cropFromTop > 0 || cropFromBottom > 0)
+				if (cropFromTop > 0 || cropFromBottom > 0 || cropFromLeft > 0)
 				{
 					IImageEditor imageEditor = _imageEditorFactory.CreateImageEditor(actualImage);
 					(int width, int height) = imageEditor.GetSize();
 
-					imageEditor.Crop(cropFromLeft, cropFromTop, width - cropFromLeft - cropFromRight, height - cropFromTop - cropFromBottom);
+					// Handle different cropping scenarios
+					int cropX = cropFromLeft;
+					int cropY = cropFromTop;
+					int cropWidth = width - cropFromLeft;
+					int cropHeight = height - cropFromTop - cropFromBottom;
+
+					imageEditor.Crop(cropX, cropY, cropWidth, cropHeight);
 
 					actualImage = imageEditor.GetUpdatedImage();
 				}
