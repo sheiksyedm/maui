@@ -4,6 +4,8 @@
 
 If Gate is not passed, go back to `.github/agents/pr.md` and complete phases 1-2 first.
 
+**🚨 IMPORTANT: Test-Only PRs should NOT reach phases 3-4 for fix exploration.** If the PR is test-only (has `[Testing]` tag or `area-testing` label), Phase 3 is skipped entirely. Phase 4 runs in simplified mode (pr-finalize + code review only, no try-fix comparison).
+
 ---
 
 ## Workflow Overview

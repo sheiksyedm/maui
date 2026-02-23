@@ -4,6 +4,31 @@ This file contains critical rules that apply across all PR agent phases. Referen
 
 ---
 
+## Test-Only PR Detection
+
+**CRITICAL: Detect test-only PRs early and adjust workflow accordingly.**
+
+A PR is "test-only" if **any** of these criteria match:
+- Title contains `[Testing]` tag
+- PR has `area-testing` label
+- PR only adds or modifies test files without functional code changes
+- Description explicitly states it's for test coverage only
+
+### Workflow for Test-Only PRs
+
+| Phase | Action |
+|-------|--------|
+| Phase 1: Pre-Flight | ✅ Run |
+| Phase 2: Gate | ✅ Run (simplified - run tests directly, not verify-tests-fail) |
+| Phase 3: Fix | ❌ Skip |
+| Phase 4: Report | ✅ Run (simplified - pr-finalize + code review only) |
+
+**Detailed guidance:** See `.github/instructions/test-only-prs.instructions.md`
+
+**Handling Mixed PRs:** If a PR has both functional code changes AND tests, treat it as an issue-fix PR (run full workflow). Only use test-only workflow when PR contains ZERO changes to non-test source files.
+
+---
+
 ## Phase Completion Protocol
 
 **Before changing ANY phase status to ✅ COMPLETE:**

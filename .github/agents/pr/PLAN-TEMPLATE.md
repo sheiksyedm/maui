@@ -6,6 +6,7 @@
 - `.github/agents/pr.md` - Phases 1-2 (Pre-Flight, Gate)
 - `.github/agents/pr/post-gate.md` - Phases 3-4 (Fix, Report)
 - `.github/agents/pr/SHARED-RULES.md` - Critical rules (blockers, git, templates)
+- `.github/instructions/test-only-prs.instructions.md` - Test-only PR handling
 
 ---
 
@@ -22,15 +23,39 @@ See `SHARED-RULES.md` for complete details. Key points:
 
 ## Work Plan
 
+### Phase 0: Detect PR Type ⚠️
+
+**CRITICAL: Check if this is a test-only PR before proceeding**
+
+A PR is "test-only" if:
+- [ ] Title contains `[Testing]` tag, OR
+- [ ] PR has `area-testing` label, OR
+- [ ] PR only adds/modifies test files without functional code, OR
+- [ ] Description explicitly states it's for test coverage only
+
+**If test-only PR detected:**
+- [ ] ✅ Continue with Phase 1 (Pre-Flight) - understand what tests do
+- [ ] ✅ Continue with Phase 2 (Gate) - **run tests to verify they PASS**
+- [ ] ❌ **SKIP Phase 3 (Fix)** - no bug to fix, no alternatives to explore
+- [ ] ✅ **Simplified Phase 4 (Report)** - pr-finalize + code review only (no try-fix comparison)
+- [ ] Document in state file: `PR Type: Test-Only - Phase 3 skipped, Phase 4 simplified`
+
+**If issue-fix PR:** Continue with all phases normally
+
+**Mixed PRs:** If PR has functional code changes AND tests, treat as issue-fix PR (run full workflow)
+
+---
+
 ### Phase 1: Pre-Flight
 - [ ] Create state file: `CustomAgentLogsTmp/PRState/pr-XXXXX.md`
 - [ ] Gather PR metadata (title, body, labels, author)
+- [ ] **Detect PR type** (test-only vs issue-fix) - record in state file
 - [ ] Fetch and read linked issue
 - [ ] Fetch PR comments and review feedback
 - [ ] Check for prior agent reviews (import and resume if found)
 - [ ] Document platforms affected
 - [ ] Classify changed files (fix vs test)
-- [ ] Document PR's fix approach in Fix Candidates table
+- [ ] Document PR's fix approach in Fix Candidates table (skip if test-only)
 - [ ] Update state file: Pre-Flight → ✅ COMPLETE
 - [ ] Save state file
 
@@ -39,21 +64,30 @@ See `SHARED-RULES.md` for complete details. Key points:
 ### Phase 2: Gate ⛔
 **🚨 Cannot continue if Gate fails**
 
+**For issue-fix PRs:** Run full verification (tests fail without fix, pass with fix)
+**For test-only PRs:** Run tests directly to verify they PASS
+
 - [ ] Check if tests exist (if not, let the user know and suggest using `write-tests-agent`)
 - [ ] Select platform (must be affected AND available on host)
-- [ ] Invoke via **task agent** (NOT inline):
+- [ ] **If issue-fix PR:** Invoke via **task agent** (NOT inline):
   ```
   "Run verify-tests-fail-without-fix skill
    Platform: [X], TestFilter: 'IssueXXXXX', RequireFullVerification: true"
   ```
+- [ ] **If test-only PR:** Run tests directly:
+  ```bash
+  pwsh .github/scripts/BuildAndRunHostApp.ps1 -Platform android -TestFilter "IssueXXXXX"
+  ```
 - [ ] ⛔ If environment blocker: STOP, report, ask user
-- [ ] Verify: Tests FAIL without fix, PASS with fix
+- [ ] **Issue-fix PR:** Verify tests FAIL without fix, PASS with fix
+- [ ] **Test-only PR:** Verify tests PASS (see `.github/instructions/test-only-prs.instructions.md` for success criteria)
 - [ ] If Gate fails: STOP, request test fixes
 - [ ] Update state file: Gate → ✅ PASSED
 - [ ] Save state file
 
 ### Phase 3: Fix 🔧
 *(Only if Gate ✅ PASSED)*
+**⏭️ SKIP this phase if PR is test-only** (no bug to fix)
 
 **Round 1: Run try-fix with each model (SEQUENTIAL)**
 - [ ] claude-sonnet-4.6
@@ -81,6 +115,17 @@ See `SHARED-RULES.md` for complete details. Key points:
 ### Phase 4: Report 📋
 *(Only if Phases 1-3 complete)*
 
+**For test-only PRs:** Simplified workflow (skip try-fix comparison)
+**For issue-fix PRs:** Full report with try-fix comparison
+
+**Test-only PR workflow:**
+- [ ] Run `pr-finalize` skill
+- [ ] Perform code review (test quality, platform guards, AutomationIds)
+- [ ] Post pr-finalize comment
+- [ ] Update state file: Report → ✅ COMPLETE
+
+**Issue-fix PR workflow:**
+
 - [ ] Run `pr-finalize` skill
 - [ ] Generate review: root cause, candidates, recommendation
 - [ ] Post AI Summary comment (PR phases + try-fix):
@@ -99,13 +144,15 @@ See `SHARED-RULES.md` for complete details. Key points:
 
 ## Quick Reference
 
-| Phase | Key Action | Blocker Response |
-|-------|------------|------------------|
-| Pre-Flight | Create state file | N/A |
-| Gate | Task agent → verify script | ⛔ STOP, report, ask |
-| Fix | Multi-model try-fix | ⛔ STOP, report, ask |
-| Report | Post via skill | ⛔ STOP, report, ask |
+| Phase | Key Action | Blocker Response | Test-Only PR? |
+|-------|------------|------------------|---------------|
+| Pre-Flight | Create state file, detect PR type | N/A | ✅ Run |
+| Gate | Task agent → verify script (issue-fix) OR direct test run (test-only) | ⛔ STOP, report, ask | ✅ Run (simplified) |
+| Fix | Multi-model try-fix (5 models) | ⛔ STOP, report, ask | ❌ Skip |
+| Report | Post via skill | ⛔ STOP, report, ask | ✅ Run (simplified - pr-finalize only) |
 
 **State file:** `CustomAgentLogsTmp/PRState/pr-XXXXX.md`
 
 **Never:** Mark BLOCKED and continue, claim success without tests, bypass scripts
+
+**Test-Only PRs:** Run Pre-Flight + Gate (test verification) + pr-finalize (skip Fix phase, no try-fix comparison)
