@@ -177,9 +177,9 @@ git push
 > It would be very helpful if you could [test the resulting artifacts](https://github.com/dotnet/maui/wiki/Testing-PR-Builds) from this PR and let us know in a comment if this change resolves your issue. Thank you!
 ```
 
-Always put that at the top, without the block quotes. Without it, users will NOT be able to try the PR and your work will have been in vain!
+For issue-fix PRs, always put that at the top, without the block quotes. Without it, users will NOT be able to try the PR and your work will have been in vain!
 
-**Test-only PRs** (PRs with `[Testing]` tag, `area-testing` label, or only test file changes) do NOT need the NOTE block, as users don't need to test artifacts for test infrastructure changes.
+**Test-only PRs** (PRs with `[Testing]` tag, `area-testing` label, or only test file changes) do NOT need the NOTE block, as users don't need to test artifacts for test-only changes.
 
 
 

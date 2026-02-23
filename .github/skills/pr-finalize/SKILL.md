@@ -149,14 +149,14 @@ A PR is considered "test-only" if:
 - PR description explicitly states it's for test coverage only
 
 **For test-only PRs:** 
-- Do NOT recommend adding the NOTE block (users don't need to test artifacts for test infrastructure changes)
+- Do NOT recommend adding the NOTE block (users generally don't need to manually test PR artifacts when changes only affect automated tests or test infrastructure and have no user-facing behavior impact)
 - **DO recommend adding `[Testing]` prefix to title if missing** (helps identify test-only PRs at a glance)
 
 **For issue-fix PRs:** 
 - Always recommend the NOTE block
 - Use platform prefix like `[iOS]`, `[Android]`, `[Windows]` if platform-specific
 
-**For issue-fix PRs:** Always recommend the NOTE block:
+Use this NOTE block template in the description:
 
 ```markdown
 <!-- Please let the below note in for people that find this PR -->
