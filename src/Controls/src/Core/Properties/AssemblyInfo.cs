@@ -60,6 +60,8 @@ using Compatibility = Microsoft.Maui.Controls.Compatibility;
 [assembly: InternalsVisibleTo("CommunityToolkit.Maui.Markup.UnitTests")]
 [assembly: InternalsVisibleTo("Controls.TestCases.HostApp")]
 
+[assembly: InternalsVisibleTo("Core.Benchmarks")]
+
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 [assembly: Preserve]
