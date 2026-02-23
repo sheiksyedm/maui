@@ -15,7 +15,7 @@
 See `SHARED-RULES.md` for complete details. Key points:
 - **Environment Blockers**: STOP immediately, report, ask user (strict retry limits)
 - **No Git Commands**: Never checkout/switch branches - agent is always on correct branch
-- **Gate via Task Agent**: Never run inline (prevents fabrication)
+- **Gate via Task Agent for issue-fix PRs**: Never run inline (prevents fabrication); test-only PRs may run direct test commands
 - **Multi-Model try-fix**: 5 models, SEQUENTIAL only
 - **Follow Templates**: No `open` attributes, no "improvements"
 
@@ -27,20 +27,24 @@ See `SHARED-RULES.md` for complete details. Key points:
 
 **CRITICAL: Check if this is a test-only PR before proceeding**
 
-A PR is "test-only" if:
-- [ ] Title contains `[Testing]` tag, OR
-- [ ] PR has `area-testing` label, OR
-- [ ] PR only adds/modifies test files without functional code, OR
-- [ ] Description explicitly states it's for test coverage only
+- [ ] **Step 1 - Check intent signals (hints only):**
+  - Title contains `[Testing]` tag, OR
+  - PR has `area-testing` label, OR
+  - Description explicitly states it's for test coverage only
 
-**If test-only PR detected:**
+- [ ] **Step 2 - Confirm via diff classification (REQUIRED):**
+  - Review changed files in the PR
+  - Verify **ALL** changed files are test files (see patterns in `.github/instructions/test-only-prs.instructions.md`)
+  - **If ANY non-test file is changed** → treat as issue-fix PR, regardless of title/labels
+
+**If test-only PR confirmed (ZERO non-test files changed):**
 - [ ] ✅ Continue with Phase 1 (Pre-Flight) - understand what tests do
 - [ ] ✅ Continue with Phase 2 (Gate) - **run tests to verify they PASS**
 - [ ] ❌ **SKIP Phase 3 (Fix)** - no bug to fix, no alternatives to explore
 - [ ] ✅ **Simplified Phase 4 (Report)** - pr-finalize + code review only (no try-fix comparison)
 - [ ] Document in state file: `PR Type: Test-Only - Phase 3 skipped, Phase 4 simplified`
 
-**If issue-fix PR:** Continue with all phases normally
+**If issue-fix PR (has non-test file changes):** Continue with all phases normally
 
 **Mixed PRs:** If PR has functional code changes AND tests, treat as issue-fix PR (run full workflow)
 
@@ -74,9 +78,13 @@ A PR is "test-only" if:
   "Run verify-tests-fail-without-fix skill
    Platform: [X], TestFilter: 'IssueXXXXX', RequireFullVerification: true"
   ```
-- [ ] **If test-only PR:** Run tests directly:
+- [ ] **If test-only PR:** Select and run the correct test command based on the routing table in `.github/instructions/test-only-prs.instructions.md`:
   ```bash
-  pwsh .github/scripts/BuildAndRunHostApp.ps1 -Platform android -TestFilter "IssueXXXXX"
+  # Examples (choose based on test type from routing table):
+  # UI Tests: pwsh .github/scripts/BuildAndRunHostApp.ps1 -Platform android -TestFilter "IssueXXXXX"
+  # Unit Tests: dotnet test src/Controls/tests/Core.UnitTests/Controls.Core.UnitTests.csproj
+  # XAML Tests: dotnet test src/Controls/tests/Xaml.UnitTests/Controls.Xaml.UnitTests.csproj
+  # Integration/Device: Use appropriate skill
   ```
 - [ ] ⛔ If environment blocker: STOP, report, ask user
 - [ ] **Issue-fix PR:** Verify tests FAIL without fix, PASS with fix

@@ -8,11 +8,14 @@ This file contains critical rules that apply across all PR agent phases. Referen
 
 **CRITICAL: Detect test-only PRs early and adjust workflow accordingly.**
 
-A PR is "test-only" if **any** of these criteria match:
-- Title contains `[Testing]` tag
-- PR has `area-testing` label
-- PR only adds or modifies test files without functional code changes
-- Description explicitly states it's for test coverage only
+A PR may be treated as **"test-only" _only if_ the following are true:**
+- **Decisive rule (required):** The PR only adds or modifies test files with **zero changes to non-test source files** (no functional code changes).
+- **Secondary signals (hints only):** One or more of the following suggest the PR is focused on tests:
+  - Title contains `[Testing]` tag
+  - PR has `area-testing` label
+  - Description explicitly states it's for test coverage only
+
+**Never classify a PR as test-only if any non-test source file is changed, regardless of title, labels, or description.**
 
 ### Workflow for Test-Only PRs
 

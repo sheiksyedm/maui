@@ -4,17 +4,18 @@ This document provides guidance for AI agents when working with test-only PRs.
 
 ## Detection Criteria
 
-A PR is "test-only" if **any** of these apply:
-- Title contains `[Testing]` tag
-- PR has `area-testing` label
-- PR only adds or modifies test files without functional code changes
-- Description explicitly states it's for test coverage only
+A PR can be treated as **test-only** **only when both** of the following are true:
+- **Diff classification (required):** The PR only adds or modifies test files and contains **ZERO** changes to non-test source files (see patterns below).
+- **Intent signals (optional hints):** One or more of the following may suggest the PR is test-focused, but they MUST be confirmed by diff classification and can never override it:
+  - Title contains `[Testing]` tag
+  - PR has `area-testing` label
+  - Description explicitly states it's for test coverage only
 
 **Handling Mixed PRs:**
 
-If a PR modifies both functional code AND test files:
+If a PR modifies both functional code AND test files (i.e., contains at least one non-test file change):
 - ✅ **Treat as issue-fix PR** - Run full workflow (all 4 phases)
-- ❌ **Do NOT use test-only workflow**
+- ❌ **Do NOT use test-only workflow**, even if the title, labels, or description suggest it is test-only
 
 Only use test-only workflow when PR contains **ZERO** changes to non-test source files.
 
@@ -56,8 +57,8 @@ pwsh .github/skills/verify-tests-fail-without-fix/scripts/verify-tests-fail.ps1 
 | Test Type | How to Run | Example |
 |-----------|------------|---------|
 | **UI Tests** | `BuildAndRunHostApp.ps1` | `pwsh .github/scripts/BuildAndRunHostApp.ps1 -Platform android -TestFilter "Issue33632"` |
-| **Unit Tests** | `dotnet test` | `dotnet test src/Controls/tests/Core.UnitTests/` |
-| **XAML Tests** | `dotnet test` | `dotnet test src/Controls/tests/Xaml.UnitTests/` |
+| **Unit Tests** | `dotnet test` | `dotnet test src/Controls/tests/Core.UnitTests/Controls.Core.UnitTests.csproj` |
+| **XAML Tests** | `dotnet test` | `dotnet test src/Controls/tests/Xaml.UnitTests/Controls.Xaml.UnitTests.csproj` |
 | **Integration Tests** | `run-integration-tests` skill | See `.github/skills/run-integration-tests/` |
 | **Device Tests** | `run-device-tests` skill | See `.github/skills/run-device-tests/` |
 
@@ -68,20 +69,20 @@ pwsh .github/skills/verify-tests-fail-without-fix/scripts/verify-tests-fail.ps1 
 
 ### Gate Success Criteria for Test-Only PRs
 
-**Gate ✅ PASSES if:**
+**Gate success criteria for test-only PRs:**
 - Tests build successfully
 - Tests run without crashes
-- Tests pass (or fail with documented platform guards)
+- All executed tests pass (the final test run is green). Platform guards such as `TEST_FAILS_ON_*` should result in tests being skipped or compiled out on affected platforms, **not** failing.
 
-**NOT Gate failures:**
-- Test isolation issues (relies on Order(1) navigation)
-- Tests guarded with `#if TEST_FAILS_ON_*` (expected behavior)
-- Snapshot differences (code review finding)
+**NOT Gate failures (when the test run is green):**
+- Test isolation issues (relies on Order(1) navigation) → capture as a code review finding, do not block Gate if tests still pass
+- Tests guarded with `#if TEST_FAILS_ON_*` (expected behavior) → the guarded test should not run on affected platforms
+- Snapshot differences that have been reviewed and accepted as intentional changes → capture as a code review finding
 
 **Gate failures:**
 - Tests crash with unhandled exceptions
 - Build fails
-- Tests fail due to actual bugs in test code
+- Any failing tests in the final run (including failures caused by test isolation issues or snapshot mismatches)
 
 ## Common Test-Only PR Patterns
 
