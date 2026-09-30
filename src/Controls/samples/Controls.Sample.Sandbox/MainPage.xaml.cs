@@ -20,6 +20,8 @@ public partial class MainPage : ContentPage
 		_loading = true;
 		_savedName = Preferences.Default.Get(NameKey, _savedName);
 		_savedEmail = Preferences.Default.Get(EmailKey, _savedEmail);
+		if (string.IsNullOrWhiteSpace(_savedName))
+			_savedName = "Alex Johnson";
 		NameEntry.Text = _savedName;
 		EmailEntry.Text = _savedEmail;
 		NotificationsSwitch.IsToggled = Preferences.Default.Get(NotificationsKey, true);

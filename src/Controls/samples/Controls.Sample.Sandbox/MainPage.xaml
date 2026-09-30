@@ -78,7 +78,7 @@
                         </VerticalStackLayout>
                         <Label x:Name="AccountStatus" AutomationId="AccountStatus"
                                Text="Update your details below." FontSize="13"
-                               TextColor="#49454F" SemanticProperties.LiveSetting="Polite" />
+                               TextColor="#49454F" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                             <Button Text="Discard" AutomationId="DiscardButton"
                                     Clicked="OnDiscardClicked" BackgroundColor="#E8DEF8"
