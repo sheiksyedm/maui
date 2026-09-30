@@ -1,3 +1,166 @@
-﻿<ContentPage x:Class="Maui.Controls.Sample.MainPage"
-             xmlns:local="clr-namespace:Maui.Controls.Sample">
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Maui.Controls.Sample.MainPage"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="#F8F7FC">
+    <ScrollView AutomationId="AccountPreferencesScroll">
+        <VerticalStackLayout Padding="24,24,24,48" Spacing="24"
+                             MaximumWidthRequest="640"
+                             HorizontalOptions="Center">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="YOUR SPACE" TextColor="#65558F" FontSize="12"
+                           FontAttributes="Bold" CharacterSpacing="2" />
+                    <Label Text="Account &amp; preferences" FontSize="29"
+                           FontAttributes="Bold" TextColor="#1D1B20"
+                           AutomationId="PageTitle" />
+                    <Label Text="Make this space feel like yours." FontSize="14"
+                           TextColor="#49454F" />
+                </VerticalStackLayout>
+                <Border Grid.Column="1" BackgroundColor="#E8DEF8"
+                        StrokeThickness="0" WidthRequest="48" HeightRequest="48"
+                        VerticalOptions="Center" StrokeShape="RoundRectangle 24">
+                    <Label Text="✦" FontSize="22" TextColor="#6750A4"
+                           HorizontalOptions="Center" VerticalOptions="Center" />
+                </Border>
+            </Grid>
+
+            <Border BackgroundColor="#E8DEF8" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 28" Padding="20">
+                <Grid ColumnDefinitions="64,*" ColumnSpacing="16">
+                    <Border BackgroundColor="#6750A4" StrokeThickness="0"
+                            WidthRequest="64" HeightRequest="64"
+                            StrokeShape="RoundRectangle 32">
+                        <Label x:Name="AvatarInitials" AutomationId="AvatarInitials"
+                               Text="AJ" TextColor="White" FontSize="22"
+                               FontAttributes="Bold" HorizontalOptions="Center"
+                               VerticalOptions="Center" />
+                    </Border>
+                    <VerticalStackLayout Grid.Column="1" Spacing="4"
+                                         VerticalOptions="Center">
+                        <Label x:Name="ProfileName" AutomationId="ProfileName"
+                               Text="Alex Johnson" FontSize="20" FontAttributes="Bold"
+                               TextColor="#1D1B20" />
+                        <Label x:Name="ProfileEmail" AutomationId="ProfileEmail"
+                               Text="alex@example.com" FontSize="14"
+                               TextColor="#49454F" />
+                        <Label Text="PERSONAL ACCOUNT" FontSize="11"
+                               CharacterSpacing="1" FontAttributes="Bold"
+                               TextColor="#6750A4" />
+                    </VerticalStackLayout>
+                </Grid>
+            </Border>
+
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Personal details" FontSize="22" FontAttributes="Bold"
+                       TextColor="#1D1B20" AutomationId="AccountSection" />
+                <Label Text="Only stored on this device for this sample."
+                       FontSize="13" TextColor="#49454F" />
+                <Border BackgroundColor="White" Stroke="#E7E0EC" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 24" Padding="20">
+                    <VerticalStackLayout Spacing="16">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Full name" FontSize="13" TextColor="#49454F" />
+                            <Entry x:Name="NameEntry" AutomationId="NameEntry"
+                                   Placeholder="Your name" TextColor="#1D1B20"
+                                   BackgroundColor="#F3EDF7"
+                                   ClearButtonVisibility="WhileEditing"
+                                   MaxLength="80" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="Email address" FontSize="13" TextColor="#49454F" />
+                            <Entry x:Name="EmailEntry" AutomationId="EmailEntry"
+                                   Placeholder="name@example.com" Keyboard="Email"
+                                   TextColor="#1D1B20" BackgroundColor="#F3EDF7"
+                                   ClearButtonVisibility="WhileEditing"
+                                   MaxLength="254" />
+                        </VerticalStackLayout>
+                        <Label x:Name="AccountStatus" AutomationId="AccountStatus"
+                               Text="Update your details below." FontSize="13"
+                               TextColor="#49454F" SemanticProperties.LiveSetting="Polite" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <Button Text="Discard" AutomationId="DiscardButton"
+                                    Clicked="OnDiscardClicked" BackgroundColor="#E8DEF8"
+                                    TextColor="#4F378B" CornerRadius="20"
+                                    HeightRequest="48" />
+                            <Button Grid.Column="1" Text="Save changes"
+                                    AutomationId="SaveButton" Clicked="OnSaveClicked"
+                                    BackgroundColor="#6750A4" TextColor="White"
+                                    CornerRadius="20" HeightRequest="48" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Preferences" FontSize="22" FontAttributes="Bold"
+                       TextColor="#1D1B20" AutomationId="PreferencesSection" />
+                <Label Text="Choose what works for you." FontSize="13"
+                       TextColor="#49454F" />
+                <Border BackgroundColor="White" Stroke="#E7E0EC" StrokeThickness="1"
+                        StrokeShape="RoundRectangle 24" Padding="20">
+                    <VerticalStackLayout Spacing="18">
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Push notifications" FontSize="16"
+                                       FontAttributes="Bold" TextColor="#1D1B20" />
+                                <Label Text="Updates about your account activity"
+                                       FontSize="13" TextColor="#49454F" />
+                            </VerticalStackLayout>
+                            <Switch x:Name="NotificationsSwitch" Grid.Column="1"
+                                    AutomationId="NotificationsSwitch"
+                                    VerticalOptions="Center"
+                                    Toggled="OnNotificationsToggled"
+                                    OnColor="#6750A4" />
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="#E7E0EC" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Weekly digest" FontSize="16"
+                                       FontAttributes="Bold" TextColor="#1D1B20" />
+                                <Label Text="A recap every Monday"
+                                       FontSize="13" TextColor="#49454F" />
+                            </VerticalStackLayout>
+                            <Switch x:Name="DigestSwitch" Grid.Column="1"
+                                    AutomationId="DigestSwitch"
+                                    VerticalOptions="Center"
+                                    Toggled="OnDigestToggled" OnColor="#6750A4" />
+                        </Grid>
+                        <BoxView HeightRequest="1" Color="#E7E0EC" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="16">
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Compact layout" FontSize="16"
+                                       FontAttributes="Bold" TextColor="#1D1B20" />
+                                <Label Text="Show more items at a glance"
+                                       FontSize="13" TextColor="#49454F" />
+                            </VerticalStackLayout>
+                            <Switch x:Name="CompactSwitch" Grid.Column="1"
+                                    AutomationId="CompactSwitch"
+                                    VerticalOptions="Center"
+                                    Toggled="OnCompactToggled" OnColor="#6750A4" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <Border BackgroundColor="#F3EDF7" StrokeThickness="0"
+                    StrokeShape="RoundRectangle 24" Padding="20">
+                <VerticalStackLayout x:Name="PreviewItems" Spacing="14">
+                    <Label Text="YOUR PREVIEW" FontSize="12" CharacterSpacing="1"
+                           FontAttributes="Bold" TextColor="#6750A4" />
+                    <Label x:Name="PreviewTitle" AutomationId="PreviewTitle"
+                           Text="Good to see you, Alex" FontSize="19"
+                           FontAttributes="Bold" TextColor="#1D1B20" />
+                    <Label x:Name="NotificationSummary" AutomationId="NotificationSummary"
+                           Text="Notifications on · Weekly digest on"
+                           FontSize="13" TextColor="#49454F" />
+                    <Label Text="Your workspace is ready when you are."
+                           FontSize="13" TextColor="#49454F" />
+                </VerticalStackLayout>
+            </Border>
+            <Label Text="SANDBOX  •  SETTINGS DEMO" HorizontalOptions="Center"
+                   TextColor="#79747E" FontSize="11" CharacterSpacing="1" />
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
