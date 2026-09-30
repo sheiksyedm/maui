@@ -18,6 +18,13 @@
     <UseMaterial3>false</UseMaterial3>
   </PropertyGroup>
 
+  <!-- This experiment selects BOTH handlers at startup. Do not publish trimmed:
+       FeatureSwitchDefinition + a Trim=true runtime option can constant-fold away CV1. -->
+  <PropertyGroup Condition="$(TargetFramework.Contains('-windows'))">
+    <PublishTrimmed>false</PublishTrimmed>
+    <WindowsPackageType>None</WindowsPackageType>
+  </PropertyGroup>
+
   <PropertyGroup>
     <ApplicationTitle>Sandbox</ApplicationTitle>
     <!-- Workaround for https://github.com/dotnet/sdk/issues/47727
