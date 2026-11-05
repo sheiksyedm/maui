@@ -694,18 +694,29 @@ namespace Microsoft.Maui.Controls
 			(this as IPropertyPropagationController)?.PropagatePropertyChanged(null);
 		}
 
-		HashSet<string> _pendingHandlerUpdatesFromBPSet = new HashSet<string>();
+		// Track synchronous notification scopes per thread, preserving nested element/property pairs.
+		[ThreadStatic]
+		static List<(Element Element, string PropertyName)> _pendingHandlerUpdatesFromBPSet;
+
 		private protected override void OnBindablePropertySet(BindableProperty property, object original, object value, bool changed, bool willFirePropertyChanged)
 		{
 			if (willFirePropertyChanged)
 			{
-				_pendingHandlerUpdatesFromBPSet.Add(property.PropertyName);
+				_pendingHandlerUpdatesFromBPSet ??= new();
+				_pendingHandlerUpdatesFromBPSet.Add((this, property.PropertyName));
 			}
 
-			base.OnBindablePropertySet(property, original, value, changed, willFirePropertyChanged);
-			_pendingHandlerUpdatesFromBPSet.Remove(property.PropertyName);
+			try
+			{
+				base.OnBindablePropertySet(property, original, value, changed, willFirePropertyChanged);
+			}
+			finally
+			{
+				// Balance only this call's marker, including when a callback re-enters or throws.
+				if (willFirePropertyChanged)
+					_pendingHandlerUpdatesFromBPSet.RemoveAt(_pendingHandlerUpdatesFromBPSet.Count - 1);
+			}
 			UpdateHandlerValue(property.PropertyName, changed);
-
 		}
 
 		/// <summary>Method that is called when a bound property is changed.</summary>
@@ -723,7 +734,18 @@ namespace Microsoft.Maui.Controls
 			// And the user has placed reacting code inside the BP.PropertyChanged callback
 			//
 			// If the OnPropertyChanged is being called from user code, we still want that to propagate to the mapper
-			bool waitForHandlerUpdateToFireFromBP = _pendingHandlerUpdatesFromBPSet.Contains(propertyName);
+			bool waitForHandlerUpdateToFireFromBP = false;
+			if (_pendingHandlerUpdatesFromBPSet is { } pendingUpdates)
+			{
+				for (int i = pendingUpdates.Count - 1; i >= 0; i--)
+				{
+					if (ReferenceEquals(pendingUpdates[i].Element, this) && pendingUpdates[i].PropertyName == propertyName)
+					{
+						waitForHandlerUpdateToFireFromBP = true;
+						break;
+					}
+				}
+			}
 
 			base.OnPropertyChanged(propertyName);
 

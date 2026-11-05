@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Xunit;
 
 namespace Microsoft.Maui.Controls.Core.UnitTests
@@ -88,6 +89,132 @@ namespace Microsoft.Maui.Controls.Core.UnitTests
 	public class ElementTests
 		: BaseTestFixture
 	{
+		sealed class HandlerUpdateElement : Element
+		{
+			public List<string> HandlerUpdates { get; } = new();
+
+			public void NotifyPropertyChanged(string propertyName) => OnPropertyChanged(propertyName);
+
+			// Exercise the notification scope without depending on BindableObject's property storage.
+			public void NotifyBindablePropertySet(BindableProperty property, bool willFirePropertyChanged = true) =>
+				OnBindablePropertySet(property, 0, 1, true, willFirePropertyChanged);
+
+			private protected override void UpdateHandlerValue(string propertyName, bool valueChanged)
+			{
+				if (valueChanged)
+					HandlerUpdates.Add(propertyName);
+			}
+		}
+
+		[Fact]
+		public void PendingHandlerUpdateDoesNotSuppressNotificationsOnAnotherThread()
+		{
+			var element = new HandlerUpdateElement();
+			var property = BindableProperty.Create("Value", typeof(int), typeof(HandlerUpdateElement), 0);
+			int settingThreadId = Environment.CurrentManagedThreadId;
+			element.PropertyChanged += (_, args) =>
+			{
+				if (Environment.CurrentManagedThreadId != settingThreadId)
+					return;
+
+				Exception failure = null;
+				var thread = new Thread(() =>
+				{
+					try
+					{
+						element.NotifyPropertyChanged(args.PropertyName);
+					}
+					catch (Exception exception)
+					{
+						failure = exception;
+					}
+				})
+				{ IsBackground = true };
+				thread.Start();
+				Assert.True(thread.Join(TimeSpan.FromSeconds(10)));
+				Assert.Null(failure);
+				Assert.Equal(new[] { property.PropertyName }, element.HandlerUpdates);
+			};
+
+			element.NotifyBindablePropertySet(property);
+			Assert.Equal(new[] { property.PropertyName, property.PropertyName }, element.HandlerUpdates);
+		}
+
+		[Fact]
+		public void PendingHandlerUpdateIsScopedToElement()
+		{
+			var outer = new HandlerUpdateElement();
+			var inner = new HandlerUpdateElement();
+			var property = BindableProperty.Create("Value", typeof(int), typeof(HandlerUpdateElement), 0);
+			outer.PropertyChanged += (_, _) => inner.NotifyPropertyChanged(property.PropertyName);
+
+			outer.NotifyBindablePropertySet(property);
+
+			Assert.Equal(new[] { property.PropertyName }, outer.HandlerUpdates);
+			Assert.Equal(new[] { property.PropertyName }, inner.HandlerUpdates);
+		}
+
+		[Theory]
+		[InlineData(false)]
+		[InlineData(true)]
+		public void NestedPropertySetOfSamePropertyPreservesPendingHandlerUpdate(bool willFirePropertyChanged)
+		{
+			var element = new HandlerUpdateElement();
+			var property = BindableProperty.Create("Value", typeof(int), typeof(HandlerUpdateElement), 0);
+			bool nested = false;
+			element.PropertyChanged += (_, _) =>
+			{
+				if (nested)
+					return;
+
+				nested = true;
+				element.NotifyBindablePropertySet(property, willFirePropertyChanged);
+				element.NotifyPropertyChanged(property.PropertyName);
+				Assert.Equal(new[] { property.PropertyName }, element.HandlerUpdates);
+			};
+
+			element.NotifyBindablePropertySet(property);
+
+			Assert.Equal(new[] { property.PropertyName, property.PropertyName }, element.HandlerUpdates);
+		}
+
+		[Fact]
+		public void NestedPropertySetPreservesOuterPendingHandlerUpdate()
+		{
+			var element = new HandlerUpdateElement();
+			var outer = BindableProperty.Create("Outer", typeof(int), typeof(HandlerUpdateElement), 0);
+			var inner = BindableProperty.Create("Inner", typeof(int), typeof(HandlerUpdateElement), 0,
+				propertyChanged: (_, _, _) => element.NotifyPropertyChanged(outer.PropertyName));
+			bool nested = false;
+			element.PropertyChanged += (_, args) =>
+			{
+				if (args.PropertyName == outer.PropertyName && !nested)
+				{
+					nested = true;
+					element.NotifyBindablePropertySet(inner);
+				}
+			};
+
+			element.NotifyBindablePropertySet(outer);
+
+			Assert.Equal(new[] { inner.PropertyName, outer.PropertyName }, element.HandlerUpdates);
+		}
+
+		[Fact]
+		public void ThrowingPropertyChangedCallbackClearsPendingHandlerUpdate()
+		{
+			var element = new HandlerUpdateElement();
+			var failure = new InvalidOperationException("Property callback failed.");
+			var property = BindableProperty.Create("Value", typeof(int), typeof(HandlerUpdateElement), 0,
+				propertyChanged: (_, _, _) => throw failure);
+
+			Assert.Same(failure, Assert.Throws<InvalidOperationException>(() => element.NotifyBindablePropertySet(property)));
+			Assert.Empty(element.HandlerUpdates);
+
+			element.NotifyPropertyChanged(property.PropertyName);
+
+			Assert.Equal(new[] { property.PropertyName }, element.HandlerUpdates);
+		}
 
 		[Fact]
 		public void ValidateHandleUpdatesHappenAfterPropertyChangedDelegate()
